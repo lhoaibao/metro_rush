@@ -76,30 +76,21 @@ class Graph:
                 result[ls[i]] = self.get_egde(ls, i)
         self.map = result
 
-    def print_path(self, parent, end, start):
-        path = [end]
-        while not end.compare(start):
-            end = parent[end]
-            path.insert(0,end)
-        for item in path:
-            print(item.station_name,item.line_name)
-
     def bfs(self):
         start = self.require_data['START']
         end = self.require_data['END']
         graph = self.map
         if start.compare(end):
-            print([start])
-        queue = deque([start])
-        parent = {}
-        parent[start] = start
+            return [start]
+        visited = {start}
+        queue = deque([(start,[])])
         while queue:
-            currNode = queue.popleft()
-            for neighbor in graph[currNode]:
+            cur, path = queue.popleft()
+            visited.add(cur)
+            for neighbor in graph[cur]:
                 if neighbor.compare(end):
-                    parent[neighbor] = currNode
-                    self.print_path(parent, neighbor, start)
-                    return
-                if neighbor not in parent:
-                    parent[neighbor] = currNode
-                    queue.append(neighbor)
+                    return path + [cur, neighbor]
+                if neighbor in visited:
+                    continue
+                queue.append((neighbor, path+[cur]))
+                visited.add(neighbor)

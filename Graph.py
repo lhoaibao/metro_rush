@@ -1,67 +1,90 @@
-from Line import Line
-from Train import Train
+from Station import Station
 
 
 class Graph:
     def __init__(self):
-        """
-        4 attribue:
-            map: dictionary store with from name_line:
-        """
         self.map = {}
-        self.start = []
-        self.end = []
-        self.total_train = 0
-        self.list_info_train = {}
+        self.map_data = {}
+        self.require_data = {}
 
+    def __load_data(self, file_name):
+        try:
+            with open(file_name, 'r') as f:
+                f_content = f.read().split('\n\n')
+                f_content[0] += '\n'
+            return f_content
+        except Exception:
+            return None
 
+    def __excute_map_data(self, map_data):
+        result = {}
+        map_data = map_data.split('#')[1:]
+        for item in map_data:
+            item = item.split('\n')[:-1]
+            res = []
+            for i in range(1, len(item)):
+                data = item[i].split(':')
+                if 'Conn' in item[i]:
+                    res.append(Station(item[0], data[0], data[1], data[3].strip()))
+                else:
+                    res.append(Station(item[0], data[0], data[1]))
+            result[item[0]] = res
+        return result
 
-    def load_graph(self, file_name):
-        """
-        input: file_name
-        excute content of file into small part by obj
-        -   require of user
-        -   a map to run
-        """
-        with open(file_name) as f:
-            file_content = f.read().split('\n\n')
-        self.__excute_line_require(file_content[1])
-        self.__excute_data_map(file_content[0])
+    def __excute_require_data(self, require_data):
+        result = {}
+        require_data = require_data.split('\n')[:-1]
+        map_data = self.map_data
+        for i in range(len(require_data)):
+            require_data[i] = require_data[i].split(':')
+        result['START'] = map_data[require_data[0][0][6:]][int(require_data[0][1])-1]
+        result['END'] = map_data[require_data[1][0][4:]][int(require_data[1][1])]
+        result['TRAINS'] = int(require_data[2][0][7:])
+        return result
 
-    def __excute_line_require(self, data):
-        """
-        get 3 line end and analysis the require info
-        -   start station
-        -   end station
-        -   total train
-        """
-        data = data.split('\n')
-        start = data[0].split(':')
-        self.start = [start[0][6:], int(start[1])]
-        end = data[1].split(':')
-        self.end = [end[0][4:], int(end[1])]
-        self.total_train = int(data[2][7:])
+    def excute_data(self, file_name):
+        (map_data, require_data) = self.__load_data(file_name)
+        self.map_data = self.__excute_map_data(map_data)
+        self.require_data = self.__excute_require_data(require_data)
 
-    def __excute_data_map(self, data):
-        """
-        get content of file except the last 3 line to analysis
-        the map
-        """
-        data += '\n'
-        data = data.split('#')
-        data.pop(0)
-        for item in data:
-            obj = Line()
-            item = obj.excute_line(item)
-            self.map[obj.name] = obj
+    def get_egde(self, stations, index):
+        result = []
+        if index == 0:
+            result.append(stations[index+1])
+        elif index == len(stations) - 1:
+            result.append(stations[index-1])
+        else:
+            result.append(stations[index+1])
+            result.append(stations[index-1])
+        check = stations[index].conn
+        if check:
+            list = self.map_data[check]
+            for i in range(1, len(list)-1):
+                if list[i].station_name == stations[index].station_name:
+                    result.append(list[i-1])
+                    result.append(list[i+1])
+        return result
 
-    def set_train(self):
-        num = self.total_train
-        start = self.start
-        list_temp = {}
-        for i in range(num):
-            id = 'T'+str(i+1)
-            list_temp[id] = Train()
+    def parse_map(self):
+        result= {}
+        map_data = self.map_data
+        list_line = map_data.keys()
+        for item in list_line:
+            ls = map_data[item]
+            for i in range(len(ls)):
+                result[ls[i]] = self.get_egde(ls, i)
+        self.map = result
 
-    def __store_data(self):
-        pass
+    def bfs(self):
+        start = self.require_data['START']
+        end = self.require_data['END']
+        graph = self.map
+        queue = [(start, [start])]
+        while queue:
+            vertex, path = queue.pop(0)
+            print(path)
+            for next in graph[vertex]:
+                if next == end:
+                    yield path +[next]
+                else:
+                    queue.append((next, path+[next]))

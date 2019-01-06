@@ -3,10 +3,9 @@ from Graph import Graph
 
 
 def main():
-    A = Graph()
-    a = A.load_graph('delhi-metro-stations')
-    print(A.map['Yellow Line'].get_info())
-
+    a = Graph()
+    a.excute_data('delhi-metro-stations')
+    a.parse_map()
 
 if __name__ == '__main__':
     main()

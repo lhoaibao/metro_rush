@@ -1,4 +1,5 @@
 from Station import Station
+from collections import deque
 
 
 class Graph:
@@ -75,16 +76,30 @@ class Graph:
                 result[ls[i]] = self.get_egde(ls, i)
         self.map = result
 
+    def print_path(self, parent, end, start):
+        path = [end]
+        while not end.compare(start):
+            end = parent[end]
+            path.insert(0,end)
+        for item in path:
+            print(item.station_name,item.line_name)
+
     def bfs(self):
         start = self.require_data['START']
         end = self.require_data['END']
         graph = self.map
-        queue = [(start, [start])]
+        if start.compare(end):
+            print([start])
+        queue = deque([start])
+        parent = {}
+        parent[start] = start
         while queue:
-            vertex, path = queue.pop(0)
-            print(path)
-            for next in graph[vertex]:
-                if next == end:
-                    yield path +[next]
-                else:
-                    queue.append((next, path+[next]))
+            currNode = queue.popleft()
+            for neighbor in graph[currNode]:
+                if neighbor.compare(end):
+                    parent[neighbor] = currNode
+                    self.print_path(parent, neighbor, start)
+                    return
+                if neighbor not in parent:
+                    parent[neighbor] = currNode
+                    queue.append(neighbor)

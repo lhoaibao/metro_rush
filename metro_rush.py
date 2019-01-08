@@ -8,5 +8,6 @@ def main():
     a.parse_map()
     a.run_trains()
 
+
 if __name__ == '__main__':
     main()

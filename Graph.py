@@ -33,7 +33,8 @@ class Graph:
             for i in range(1, len(item)):
                 data = item[i].split(':')
                 if 'Conn' in item[i]:
-                    res.append(Station(item[0], data[0], data[1], data[3].strip()))
+                    res.append(Station(item[0], data[0], data[1],
+                               data[3].strip()))
                 else:
                     res.append(Station(item[0], data[0], data[1]))
             result[item[0]] = res
@@ -43,13 +44,13 @@ class Graph:
         """
         """
         result = {}
-        require_data = require_data.split('\n')[:-1]
-        map_data = self.map_data
-        for i in range(len(require_data)):
-            require_data[i] = require_data[i].split(':')
-        result['START'] = map_data[require_data[0][0][6:]][int(require_data[0][1])-1]
-        result['END'] = map_data[require_data[1][0][4:]][int(require_data[1][1])]
-        result['TRAINS'] = int(require_data[2][0][7:])
+        r_data = require_data.split('\n')[:-1]
+        m_data = self.map_data
+        for i in range(len(r_data)):
+            r_data[i] = r_data[i].split(':')
+        result['START'] = m_data[r_data[0][0][6:]][int(r_data[0][1])-1]
+        result['END'] = m_data[r_data[1][0][4:]][int(r_data[1][1])]
+        result['TRAINS'] = int(r_data[2][0][7:])
         return result
 
     def excute_data(self, file_name):
@@ -59,7 +60,7 @@ class Graph:
         self.map_data = self.__excute_map_data(map_data)
         self.require_data = self.__excute_require_data(require_data)
 
-    def get_egde(self, stations, index):
+    def __get_egde(self, stations, index):
         """
         """
         result = []
@@ -84,16 +85,16 @@ class Graph:
         map is a dict store type {station:[station,...]}
         value is the egde of this station
         """
-        result= {}
+        result = {}
         map_data = self.map_data
         list_line = map_data.keys()
         for item in list_line:
             ls = map_data[item]
             for i in range(len(ls)):
-                result[ls[i]] = self.get_egde(ls, i)
+                result[ls[i]] = self.__get_egde(ls, i)
         self.map = result
 
-    def bfs(self):
+    def __bfs(self):
         """
 
         """
@@ -103,7 +104,7 @@ class Graph:
         if start.compare(end):
             return [start]
         visited = {start}
-        queue = deque([(start,[])])
+        queue = deque([(start, [])])
         while queue:
             cur, path = queue.popleft()
             visited.add(cur)
@@ -114,9 +115,23 @@ class Graph:
                     queue.append((neighbor, path+[cur]))
                     visited.add(neighbor)
 
+    def __print_status_run(self, path):
+        for item in path[:-1]:
+            if len(item.train) > 0:
+                print('{}({}:{})-{}'.format(item.station_name,
+                                            item.line_name,
+                                            item.id_station,
+                                            ','.join([x.id for x in item.train]
+                                                     )), end=' ')
+        print('{}({}:{})-{}\n'.format(path[-1].station_name,
+                                      path[-1].line_name,
+                                      path[-1].id_station,
+                                      ','.join([x.id for x in path[-1].train])
+                                      ))
+
     def run_trains(self):
         trains = []
-        path = self.bfs()
+        path = self.__bfs()
         num_train = self.require_data['TRAINS']
         start = self.require_data['START']
         end = self.require_data['END']
@@ -130,9 +145,13 @@ class Graph:
             for i in range(num_train):
                 if trains[i].index == len(path)-1:
                     pass
-                elif path[trains[i].index].conn and path[trains[i].index].line_name != path[trains[i].index+1].line_name and path[trains[i].index].wait != 1:
+                elif (path[trains[i].index].conn and
+                      (path[trains[i].index].line_name !=
+                      path[trains[i].index+1].line_name) and
+                      path[trains[i].index].wait != 1):
                     path[trains[i].index].wait += 1
-                elif len(path[(trains[i].index)+1].train) == 1 and not path[(trains[i].index)+1].compare(end):
+                elif (len(path[(trains[i].index)+1].train) == 1 and not
+                      path[(trains[i].index)+1].compare(end)):
                     pass
                 else:
                     store = trains[i]
@@ -141,6 +160,4 @@ class Graph:
                     path[trains[i].index].train.remove(trains[i])
                     trains[i].index += 1
                     path[trains[i].index].train.append(store)
-            for item in path:
-                if len(item.train) > 0:
-                    print('{}({}:{})-{}\n'.format(item.station_name, item.line_name, item.id_station,[x.id for x in item.train]))
+            self.__print_status_run(path)

@@ -7,6 +7,10 @@ class Station:
         self.train = []
         self.wait = 0
 
+    def __repr__(self):
+        return '{}({}: {})'.format(self.station_name,
+                                   self.line_name, self.id_station)
+
     def compare(self, other):
         return (self.line_name == other.line_name and
                 self.id_station == other.id_station)

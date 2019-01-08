@@ -78,6 +78,10 @@ class Graph:
                 if list[i].station_name == stations[index].station_name:
                     result.append(list[i-1])
                     result.append(list[i+1])
+            if list[0].station_name == stations[index].station_name:
+                result.append(list[1])
+            if list[len(list)-1].station_name == stations[index].station_name:
+                result.append(list[len(list)-2])
         return result
 
     def parse_map(self):
@@ -94,12 +98,9 @@ class Graph:
                 result[ls[i]] = self.__get_egde(ls, i)
         self.map = result
 
-    def __bfs(self):
+    def __bfs(self, start, end):
         """
-
         """
-        start = self.require_data['START']
-        end = self.require_data['END']
         graph = self.map
         if start.compare(end):
             return [start]
@@ -116,22 +117,18 @@ class Graph:
                     visited.add(neighbor)
 
     def __print_status_run(self, path):
-        for item in path[:-1]:
+        for item in path:
             if len(item.train) > 0:
                 print('{}({}:{})-{}'.format(item.station_name,
                                             item.line_name,
                                             item.id_station,
                                             ','.join([x.id for x in item.train]
                                                      )), end=' ')
-        print('{}({}:{})-{}\n'.format(path[-1].station_name,
-                                      path[-1].line_name,
-                                      path[-1].id_station,
-                                      ','.join([x.id for x in path[-1].train])
-                                      ))
+        print('')
 
     def run_trains(self):
         trains = []
-        path = self.__bfs()
+        path = self.__bfs(self.require_data['START'], self.require_data['END'])
         num_train = self.require_data['TRAINS']
         start = self.require_data['START']
         end = self.require_data['END']

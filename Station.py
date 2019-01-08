@@ -4,6 +4,8 @@ class Station:
         self.id_station = id_station
         self.station_name = station_name
         self.conn = conn
+        self.train = []
+        self.wait = 0
 
     def compare(self, other):
         return (self.line_name == other.line_name and

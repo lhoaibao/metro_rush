@@ -1,14 +1,19 @@
 from Station import Station
+from Train import Train
 from collections import deque
 
 
 class Graph:
     def __init__(self):
+        """
+        """
         self.map = {}
         self.map_data = {}
         self.require_data = {}
 
     def __load_data(self, file_name):
+        """
+        """
         try:
             with open(file_name, 'r') as f:
                 f_content = f.read().split('\n\n')
@@ -18,6 +23,8 @@ class Graph:
             return None
 
     def __excute_map_data(self, map_data):
+        """
+        """
         result = {}
         map_data = map_data.split('#')[1:]
         for item in map_data:
@@ -33,6 +40,8 @@ class Graph:
         return result
 
     def __excute_require_data(self, require_data):
+        """
+        """
         result = {}
         require_data = require_data.split('\n')[:-1]
         map_data = self.map_data
@@ -44,11 +53,15 @@ class Graph:
         return result
 
     def excute_data(self, file_name):
+        """
+        """
         (map_data, require_data) = self.__load_data(file_name)
         self.map_data = self.__excute_map_data(map_data)
         self.require_data = self.__excute_require_data(require_data)
 
     def get_egde(self, stations, index):
+        """
+        """
         result = []
         if index == 0:
             result.append(stations[index+1])
@@ -67,6 +80,10 @@ class Graph:
         return result
 
     def parse_map(self):
+        """
+        map is a dict store type {station:[station,...]}
+        value is the egde of this station
+        """
         result= {}
         map_data = self.map_data
         list_line = map_data.keys()
@@ -77,6 +94,9 @@ class Graph:
         self.map = result
 
     def bfs(self):
+        """
+
+        """
         start = self.require_data['START']
         end = self.require_data['END']
         graph = self.map
@@ -90,7 +110,37 @@ class Graph:
             for neighbor in graph[cur]:
                 if neighbor.compare(end):
                     return path + [cur, neighbor]
-                if neighbor in visited:
-                    continue
-                queue.append((neighbor, path+[cur]))
-                visited.add(neighbor)
+                if neighbor not in visited:
+                    queue.append((neighbor, path+[cur]))
+                    visited.add(neighbor)
+
+    def run_trains(self):
+        trains = []
+        path = self.bfs()
+        num_train = self.require_data['TRAINS']
+        start = self.require_data['START']
+        end = self.require_data['END']
+        for i in range(num_train):
+            trains.append(Train('T'+str(i+1), start))
+        start.train = trains.copy()
+        turn = 0
+        while len(end.train) != num_train:
+            turn += 1
+            print('turn {}:'.format(turn))
+            for i in range(num_train):
+                if trains[i].index == len(path)-1:
+                    pass
+                elif path[trains[i].index].conn and path[trains[i].index].line_name != path[trains[i].index+1].line_name and path[trains[i].index].wait != 1:
+                    path[trains[i].index].wait += 1
+                elif len(path[(trains[i].index)+1].train) == 1 and not path[(trains[i].index)+1].compare(end):
+                    pass
+                else:
+                    store = trains[i]
+                    if path[trains[i].index].wait == 1:
+                        path[trains[i].index].wait -= 1
+                    path[trains[i].index].train.remove(trains[i])
+                    trains[i].index += 1
+                    path[trains[i].index].train.append(store)
+            for item in path:
+                if len(item.train) > 0:
+                    print('{}({}:{})-{}\n'.format(item.station_name, item.line_name, item.id_station,[x.id for x in item.train]))

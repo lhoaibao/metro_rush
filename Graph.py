@@ -73,6 +73,7 @@ class Graph:
 
     def __get_egde(self, stations, index):
         """
+        get the connet station from this station to a list
         """
         result = []
         if index == 0:

@@ -6,6 +6,10 @@ from collections import deque
 class Graph:
     def __init__(self):
         """
+        class has 3 attribute:
+            map: value of this attribute depend on type of algo
+            map_data: store data of map
+            require_data: store data of require
         """
         self.map = {}
         self.map_data = {}
@@ -13,6 +17,10 @@ class Graph:
 
     def __load_data(self, file_name):
         """
+        input: file_name
+        output:
+            -return content of file
+            -return None if file not exist or can not open
         """
         try:
             with open(file_name, 'r') as f:
@@ -24,6 +32,7 @@ class Graph:
 
     def __excute_map_data(self, map_data):
         """
+        this function handling the data of map
         """
         result = {}
         map_data = map_data.split('#')[1:]
@@ -42,6 +51,7 @@ class Graph:
 
     def __excute_require_data(self, require_data):
         """
+        this function hangling the data of require
         """
         result = {}
         r_data = require_data.split('\n')[:-1]
@@ -55,6 +65,7 @@ class Graph:
 
     def excute_data(self, file_name):
         """
+        this function is call first to excute all the data
         """
         (map_data, require_data) = self.__load_data(file_name)
         self.map_data = self.__excute_map_data(map_data)
@@ -62,6 +73,7 @@ class Graph:
 
     def __get_egde(self, stations, index):
         """
+        
         """
         result = []
         if index == 0:

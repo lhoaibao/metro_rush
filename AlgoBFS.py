@@ -50,11 +50,13 @@ class AlgoBFS(Graph):
             return [start]
         visited = {start}
         queue = deque([(start, [])])
+        result = []
         while queue:
             cur, path = queue.popleft()
             visited.add(cur)
             for neighbor in graph[cur]:
                 if neighbor.compare(end):
+                    result.append((path + [cur, neighbor]))
                     return path + [cur, neighbor]
                 if neighbor not in visited:
                     queue.append((neighbor, path+[cur]))

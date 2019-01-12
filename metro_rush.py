@@ -5,13 +5,12 @@ from AlgoBFS import AlgoBFS
 
 def main():
     a = AlgoBFS()
-    a.excute_data(sys.argv[1])
+    try:
+        a.excute_data(sys.argv[1])
+    except Exception:
+        print('Invalid file')
+        return None
     a.run_trains()
-
 
 if __name__ == '__main__':
     main()
-    # try:
-    #     main()
-    # except Exception:
-    #     print('sorry, program have some error')

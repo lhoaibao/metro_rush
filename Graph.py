@@ -35,7 +35,7 @@ class Graph:
         with open(file_name, 'r') as f:
             f_content = f.read()
         if len(f_content.split('\n\n')) != 2:
-            print('Invalid content')
+            print('Invalid file')
             exit(1)
         f_content = f_content.split('\n\n')
         f_content[0] += '\n'

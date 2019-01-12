@@ -70,7 +70,7 @@ class Graph:
         for i in range(len(r_data)):
             r_data[i] = r_data[i].split(':')
         result['START'] = m_data[r_data[0][0][6:]][int(r_data[0][1])-1]
-        result['END'] = m_data[r_data[1][0][4:]][int(r_data[1][1])]
+        result['END'] = m_data[r_data[1][0][4:]][int(r_data[1][1])-1]
         result['TRAINS'] = int(r_data[2][0][7:])
         return result
 
@@ -82,10 +82,17 @@ class Graph:
         self.map_data = self.__excute_map_data(map_data)
         self.require_data = self.__excute_require_data(require_data)
 
-    def print_status_run(self, path):
+    def __print_status_road(self, path):
         result = []
+        print('='*10)
         for item in path:
             if len(item.train) > 0:
                 result.append('{}-{}'.format(str(item),
                                      ','.join([x.id for x in item.train])))
         print('|'.join(result))
+
+    def print_status_run(self, path, mode):
+        self.__print_status_road(path[0])
+        if mode:
+            return None
+        self.__print_status_road(path[1])

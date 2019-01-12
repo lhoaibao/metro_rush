@@ -5,6 +5,7 @@ class Station:
         self.station_name = station_name
         self.conn = conn
         self.train = []
+        self.wait = False
 
     def __repr__(self):
         return '{}({}: {})'.format(self.station_name,
